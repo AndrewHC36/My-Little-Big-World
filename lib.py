@@ -1,92 +1,115 @@
+"""
+Andrew Shen's << My Little Big World >> game
+Created on [ 2018-7-12 9:00 AM ]
+
+"""
+
 import pygame as pyg
 from constants import *
+import lib as lb
+import gameData as gd
+import ctypes  # for the sake of stretching on high PPI screen
+ctypes.windll.user32.SetProcessDPIAware()
+
+#WORLD_NAME_FILE_INPUT = input("ENTER FILE NAME WITH FILE EXTENSION: ")
+#myWorld = lb.WorldDt(WORLD_NAME_FILE_INPUT)
+#data = myWorld.read()
+
+# ( width or x, height or y)                                    _
+# the point of origin is at the most top left corner pixel --> |
+
+WORLD_RTIME = (True, 2018, 5, 15, 7, 30, 1)  #
+WORLD_GTIME = 0  # 0 - 240000 unit - tps
+WORLD_NAME = "Testing World"
+WORLD_DATA = ""
+WORLD_SIZE = (500, 250)
+LPS = 20  # Lighting Update / sec
+TPS = 10  # Ticks           / sec
+FPS = 100  # Frames          / sec   this is the base unit of speed
+SPEED = 5  # unit - pixels per fps
+GRAVITY = 5  # unit - pixels per fps
+TITLE = "My Little Big World - {} ".format(WORLD_NAME)
+
 pyg.init()
+win = pyg.display.set_mode((0,0), pyg.FULLSCREEN)
+clock = pyg.time.Clock()
+pyg.display.set_caption(TITLE)
 
+ON_KEY = []
+CHARACTER_NAME = ""
+CHARACTER_POS = [SCREEN_SIZE[1]//2-CHARACTER_BOX[1]*PIXEL_SZ//2, SCREEN_SIZE[0]//2-CHARACTER_BOX[0]*PIXEL_SZ//2]  # The unit is pixel CHARACTER ALWAYS @ CENTER
+TERRAIN_POS = [0, 0]  # The unit is pixel and THE POS OF TERRAIN. Starts @ very top-left corner
+TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of the viewbox
+TERRAIN_DATA = gd.terrain
+TERRAIN_BLOCK = []
+CHARACTER_STATE = ""  # walkingLTa1, walkingRTa1, sneakLT, etc. etc.
+CHARACTER_JUMP = True
+RATE = [LPS, TPS, FPS]
+player = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
+terrain = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
+while MAIN_LOOP:
+    win.fill((0, 0, 0))
+    TERRAIN_BLOCK = [TERRAIN_DATA[i][0+TERRAIN_OFFSET[1]:TERRAIN_VIEWBOX[2]+TERRAIN_OFFSET[1]] for i in range(0+TERRAIN_OFFSET[0],TERRAIN_VIEWBOX[3]+TERRAIN_OFFSET[0])]
+    if "w" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED*2  # UP - Jump
+    if "a" in ON_KEY: TERRAIN_POS[0] += SPEED  # LEFT - Go left
+    if "s" in ON_KEY: TERRAIN_POS[1] -= SPEED  # DOWN - Sneak            <--         MAKESHIFT <--
+    if "d" in ON_KEY: TERRAIN_POS[0] -= SPEED  # RIGHT - Go right
+    if "_" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED  # UP - Jump
+    if "^" in ON_KEY: pass  # to 's'
+    for event in pyg.event.get():
+        if event.type == pyg.QUIT: MAIN_LOOP = False
+        elif event.type == pyg.KEYDOWN:
+            if event.key == pyg.K_ESCAPE: MAIN_LOOP = False
+            if event.key == pyg.K_w: ON_KEY.append("w")
+            if event.key == pyg.K_a: ON_KEY.append("a")
+            if event.key == pyg.K_s: ON_KEY.append("s")
+            if event.key == pyg.K_d: ON_KEY.append("d")
+            if event.key == pyg.K_SPACE:    ON_KEY.append("_")
+            if event.key == pyg.KMOD_SHIFT: ON_KEY.append("^")
+        elif event.type == pyg.KEYUP:
+            if event.key == pyg.K_w: ON_KEY.remove("w")
+            if event.key == pyg.K_a: ON_KEY.remove("a")
+            if event.key == pyg.K_s: ON_KEY.remove("s")
+            if event.key == pyg.K_d: ON_KEY.remove("d")
+            if event.key == pyg.K_SPACE:    ON_KEY.remove("_")
+            if event.key == pyg.KMOD_SHIFT: ON_KEY.remove("^")
 
-def rnd(n, base):
-    return int(base*round(float(n)/base))
+    terrain.update(TERRAIN_POS, TERRAIN_BLOCK)
+    player.update(TERRAIN_POS, TERRAIN_OFFSET)
+    player.show()
+    try:
+        terrain.display()  # this checks if the player is out of bound of terrain size
+    except IndexError:
+        TERRAIN_OFFSET = [5, 5]
 
+    TERRAIN_POS[1] -= FALL_SPEED
+    CHARACTER_JUMP = False
+    COL = player.collision(TERRAIN_BLOCK)
+    if EAST in COL:
+        if "d" in ON_KEY: TERRAIN_POS[0] += SPEED  # counter-acts form going right
+    if SOUTH in COL:
+        if "s" in ON_KEY: TERRAIN_POS[1] += SPEED  # counter-acts form going down
+        TERRAIN_POS[1] += FALL_SPEED  # When it collides, Fall_speed
+        CHARACTER_JUMP = True
+    if WEST in COL:
+        if "a" in ON_KEY: TERRAIN_POS[0] -= SPEED  # counter-acts form going left
+    if NORTH in COL:
+        if "w" in ON_KEY: TERRAIN_POS[1] -= SPEED  # counter-acts form going up
+    if TERRAIN_POS[0]/BLOCK_SZ >= 1.0:  # left side
+        TERRAIN_OFFSET[0] -= 1
+        TERRAIN_POS[0] = -SPEED
+    elif (TERRAIN_POS[0])/BLOCK_SZ <= -1.0:  # right side
+        TERRAIN_OFFSET[0] += 1
+        TERRAIN_POS[0] = -SPEED
+    elif (TERRAIN_POS[1])/BLOCK_SZ >= 1.0:  # top side
+        TERRAIN_OFFSET[1] -= 1
+        TERRAIN_POS[1] = -SPEED
+    elif (TERRAIN_POS[1])/BLOCK_SZ <= -1.0:  # bottom side
+        TERRAIN_OFFSET[1] += 1
+        TERRAIN_POS[1] = -SPEED
 
-class WorldDt:
-    def __init__(self, fname):
-        self.fname = fname
+    pyg.display.flip()
+    clock.tick(FPS)
 
-    def read(self):
-        fdata = open(self.fname, "r")
-        fdata = [i.strip("\n") for i in fdata]
-        time = fdata[0]
-        sizeHL = fdata[1].split("x")
-        title = fdata[2]
-        tick = fdata[3]
-        worldDT = fdata[5:len(fdata)]
-        inGame_time = fdata[4]
-        return time, sizeHL, title, worldDT, tick, inGame_time
-
-
-class Character:
-    def __init__(self, win, loc, sz, dt):
-        self.y = loc[1]
-        self.x = loc[0]
-        self.win = win
-        self.dt = dt
-        self.sz = sz
-
-    def update(self, loc):
-        self.y = loc[0]
-        self.x = loc[1]
-
-    def show(self):
-        for i in range(self.sz[0]):
-            for j in range(self.sz[1]):
-                pyg.draw.rect(self.win, self.dt[i][j], (self.x+i*PIXEL_SZ, self.y+j*PIXEL_SZ, PIXEL_SZ, PIXEL_SZ))
-
-    def collision(self, blockTerrain):
-        col = []
-        print(blockTerrain[rnd(self.x//BLOCK_SZ, BLOCK_SZ)][rnd(self.y//BLOCK_SZ, BLOCK_SZ)], "=", rnd(self.x//BLOCK_SZ, BLOCK_SZ), rnd(self.y//BLOCK_SZ, BLOCK_SZ))
-
-        return col # at most 2 side collision. since character-bx is smaller than block
-
-
-class Terrain:
-    def __init__(self, win, viewBX, terrainDT, currentBLK):
-        self.win = win
-        self.VSx = viewBX[0]
-        self.VSy = viewBX[1]
-        self.VEx = viewBX[2]
-        self.VEy = viewBX[3]
-        self.dt = terrainDT
-        self.blk = currentBLK
-
-    def update(self, pLOC, curBLK):
-        self.plyLOC = pLOC
-        self.blk = curBLK
-
-    def display(self):
-        hCode = {"a":"clr", "b": (100, 100, 100), "c": (255, 100, 100)}
-        for i in range(self.VEy):
-            for j in range(self.VEx):
-                if hCode[self.blk[i][j]] == "clr": pass
-                else: pyg.draw.rect(self.win, hCode[self.blk[i][j]], (i*BLOCK_SZ+self.plyLOC[0]-self.VSx*BLOCK_SZ, j*BLOCK_SZ+self.plyLOC[1]-self.VSx*BLOCK_SZ, BLOCK_SZ, BLOCK_SZ))
-
-
-def hexTOrgb(data, sz=(12, 18)):
-    return [[tuple([int(data[(i*sz[0]+j)*6:(i*sz[0]+j+1)*6][k*2:k*2+2], 16) for k in range(3)]) for j in range(sz[1])] for i in range(sz[0])]
-
-
-"""
-PRE
-s = special
-b = block
-e = entity
-p = particle
-l = liquid
-SUF
-f = foreground
-w = background (wall)
-t = together (f and w)
-
-|| FILE-ID || BLOCK-ID || - - BLOCK-NAME - - || - - - - - - BLOCK-DF_TEXTURE - - - - - - ||        
-||=========||==========||====================||==========================================||
-|| a       || s000t    || Air                || FFFFFF 
-|| b       || b000f    || Stone              || FFFFFF 
-"""
+pyg.quit()
+quit()
