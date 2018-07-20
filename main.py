@@ -43,17 +43,18 @@ TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of 
 TERRAIN_DATA = gd.terrain
 TERRAIN_BLOCK = []
 CHARACTER_STATE = ""  # walkingLTa1, walkingRTa1, sneakLT, etc. etc.
+CHARACTER_JUMP = True
 RATE = [LPS, TPS, FPS]
-player = lb.Character(win, CHARACTER_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt))
+player = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
 terrain = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
 while MAIN_LOOP:
     win.fill((0, 0, 0))
     TERRAIN_BLOCK = [TERRAIN_DATA[i][0+TERRAIN_OFFSET[1]:TERRAIN_VIEWBOX[2]+TERRAIN_OFFSET[1]] for i in range(0+TERRAIN_OFFSET[0],TERRAIN_VIEWBOX[3]+TERRAIN_OFFSET[0])]
-    if "w" in ON_KEY: TERRAIN_POS[1] += SPEED  # UP - Jump
+    if "w" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED*2  # UP - Jump
     if "a" in ON_KEY: TERRAIN_POS[0] += SPEED  # LEFT - Go left
     if "s" in ON_KEY: TERRAIN_POS[1] -= SPEED  # DOWN - Sneak            <--         MAKESHIFT <--
     if "d" in ON_KEY: TERRAIN_POS[0] -= SPEED  # RIGHT - Go right
-    if "_" in ON_KEY: TERRAIN_POS[1] += SPEED
+    if "_" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED  # UP - Jump
     if "^" in ON_KEY: pass  # to 's'
     for event in pyg.event.get():
         if event.type == pyg.QUIT: MAIN_LOOP = False
@@ -74,66 +75,41 @@ while MAIN_LOOP:
             if event.key == pyg.KMOD_SHIFT: ON_KEY.remove("^")
 
     terrain.update(TERRAIN_POS, TERRAIN_BLOCK)
+    player.update(TERRAIN_POS, TERRAIN_OFFSET)
+    player.show()
     try:
         terrain.display()  # this checks if the player is out of bound of terrain size
     except IndexError:
         TERRAIN_OFFSET = [5, 5]
 
-    player.update(CHARACTER_POS)
-    player.show()
-
+    TERRAIN_POS[1] -= FALL_SPEED
+    CHARACTER_JUMP = False
     COL = player.collision(TERRAIN_BLOCK)
     if EAST in COL:
-        if "d" in ON_KEY: TERRAIN_POS[0] += SPEED  # counter-acts form going down
+        if "d" in ON_KEY: TERRAIN_POS[0] += SPEED  # counter-acts form going right
     if SOUTH in COL:
         if "s" in ON_KEY: TERRAIN_POS[1] += SPEED  # counter-acts form going down
+        TERRAIN_POS[1] += FALL_SPEED  # When it collides, Fall_speed
+        CHARACTER_JUMP = True
     if WEST in COL:
-        if "a" in ON_KEY: TERRAIN_POS[0] -= SPEED  # counter-acts form going down
+        if "a" in ON_KEY: TERRAIN_POS[0] -= SPEED  # counter-acts form going left
     if NORTH in COL:
-        if "w" in ON_KEY: TERRAIN_POS[1] -= SPEED  # counter-acts form going down
-
+        if "w" in ON_KEY: TERRAIN_POS[1] -= SPEED  # counter-acts form going up
     if TERRAIN_POS[0]/BLOCK_SZ >= 1.0:  # left side
         TERRAIN_OFFSET[0] -= 1
-        TERRAIN_POS[0] = 0
+        TERRAIN_POS[0] = -SPEED
     elif (TERRAIN_POS[0])/BLOCK_SZ <= -1.0:  # right side
         TERRAIN_OFFSET[0] += 1
-        TERRAIN_POS[0] = 0
+        TERRAIN_POS[0] = -SPEED
     elif (TERRAIN_POS[1])/BLOCK_SZ >= 1.0:  # top side
         TERRAIN_OFFSET[1] -= 1
-        TERRAIN_POS[1] = 0
+        TERRAIN_POS[1] = -SPEED
     elif (TERRAIN_POS[1])/BLOCK_SZ <= -1.0:  # bottom side
         TERRAIN_OFFSET[1] += 1
-        TERRAIN_POS[1] = 0
+        TERRAIN_POS[1] = -SPEED
 
     pyg.display.flip()
     clock.tick(FPS)
 
 pyg.quit()
 quit()
-
-"""
-Character State:
->BASIC<
-walkingLTa1   -  Mandatory - Walking Animation face left frame #1  
-walkingRTa1   -  Mandatory - Walking Animation face right frame #1    
-walkingLTa2   -  Mandatory - Walking Animation face left frame #2  
-walkingRTa2   -  Mandatory - Walking Animation face right frame #2  
-walkingLTa3   -  Voluntary - Walking Animation face left frame #3  
-walkingRTa3   -  Voluntary - Walking Animation face right frame #3  
-sneakLTa1     -  Mandatory - Sneaking Animation face left frame #1
-snakeRTa1     -  Mandatory - Sneaking Animation face right frame #1
-sneakLTa2     -  Mandatory - Sneaking Animation face left frame #2
-snakeRTa2     -  Mandatory - Sneaking Animation face right frame #2
-sneakLTa3     -  Voluntary - Sneaking Animation face left frame #3
-snakeRTa3     -  Voluntary - Sneaking Animation face right frame #3
-jumpingLT     -  Mandatory - Jumping facing left
-jumpingRT     -  Mandatory - Jumping facing right
-jumpingLTo1   -  Voluntary - Jumping facing left using secondary animation
-jumpingRTo2   -  Voluntary - Jumping facing right using secondary animation
-fallingLT     -  Mandatory - Falling facing left
-fallingRT     -  Mandatory - Falling facing right
-fallingLTo1   -  Voluntary - Falling facing left using secondary animation
-fallingRTo1   -  Voluntary - Falling facing right using secondary animation
->CRAFTING<
-
-"""
