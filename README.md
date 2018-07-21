@@ -1,4 +1,10 @@
 # My-Little-Big-World
-This is a game based off of Terreria, Minecraft, and other sandbox games.
+This is a game based off of Terreria, Minecraft, and other sandbox games. What motivated me to build this game is the inspiration from the sandbox game where you can create, build, and be creative! 
 
-Note: I'm not going to update this frequently in summer.
+
+### Indev 2.0:
+  * + Terrain like Terria
+  * + Collision and the collision debug mode
+  * ? Jumping still not working
+
+### Indev 1.0
