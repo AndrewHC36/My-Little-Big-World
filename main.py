@@ -5,6 +5,7 @@ Created on [ 2018-7-12 9:00 AM ]
 """
 
 import pygame as pyg
+import math as m
 from constants import *
 import lib as lb
 import gameData as gd
@@ -43,70 +44,73 @@ TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of 
 TERRAIN_DATA = gd.terrain
 TERRAIN_BLOCK = []
 CHARACTER_STATE = ""  # walkingLTa1, walkingRTa1, sneakLT, etc. etc.
-CHARACTER_JUMP = True
-RATE = [LPS, TPS, FPS]
+CHARACTER_JUMP = False
+CHARACTER_JUMP_LEN = 0
+COLLISION = []
 player = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
 terrain = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
+
 while MAIN_LOOP:
     win.fill((0, 0, 0))
     TERRAIN_BLOCK = [TERRAIN_DATA[i][0+TERRAIN_OFFSET[1]:TERRAIN_VIEWBOX[2]+TERRAIN_OFFSET[1]] for i in range(0+TERRAIN_OFFSET[0],TERRAIN_VIEWBOX[3]+TERRAIN_OFFSET[0])]
-    if "w" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED*2  # UP - Jump
-    if "a" in ON_KEY: TERRAIN_POS[0] += SPEED  # LEFT - Go left
-    if "s" in ON_KEY: TERRAIN_POS[1] -= SPEED  # DOWN - Sneak            <--         MAKESHIFT <--
-    if "d" in ON_KEY: TERRAIN_POS[0] -= SPEED  # RIGHT - Go right
-    if "_" in ON_KEY and CHARACTER_JUMP: TERRAIN_POS[1] += SPEED  # UP - Jump
-    if "^" in ON_KEY: pass  # to 's'
+
     for event in pyg.event.get():
         if event.type == pyg.QUIT: MAIN_LOOP = False
         elif event.type == pyg.KEYDOWN:
             if event.key == pyg.K_ESCAPE: MAIN_LOOP = False
-            if event.key == pyg.K_w: ON_KEY.append("w")
-            if event.key == pyg.K_a: ON_KEY.append("a")
-            if event.key == pyg.K_s: ON_KEY.append("s")
-            if event.key == pyg.K_d: ON_KEY.append("d")
-            if event.key == pyg.K_SPACE:    ON_KEY.append("_")
-            if event.key == pyg.KMOD_SHIFT: ON_KEY.append("^")
+            if PLAYER_FREE_MOVE:
+                if event.key == pyg.K_w or event.key == pyg.K_UP: ON_KEY.append("w")
+                if event.key == pyg.K_a or event.key == pyg.K_LEFT: ON_KEY.append("a")
+                if event.key == pyg.K_s or event.key == pyg.K_DOWN: ON_KEY.append("s")
+                if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.append("d")
+            else:
+                if event.key == pyg.K_w and SOUTH in COLLISION: CHARACTER_JUMP = True
+                if event.key == pyg.K_a or event.key == pyg.K_LEFT: ON_KEY.append("a")
+                if event.key == pyg.K_s or event.key == pyg.K_DOWN: CHARACTER_BOX = player.sneak()
+                if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.append("d")
+                if event.key == pyg.K_SPACE: CHARACTER_JUMP = True
+
         elif event.type == pyg.KEYUP:
-            if event.key == pyg.K_w: ON_KEY.remove("w")
-            if event.key == pyg.K_a: ON_KEY.remove("a")
-            if event.key == pyg.K_s: ON_KEY.remove("s")
-            if event.key == pyg.K_d: ON_KEY.remove("d")
-            if event.key == pyg.K_SPACE:    ON_KEY.remove("_")
-            if event.key == pyg.KMOD_SHIFT: ON_KEY.remove("^")
+            if PLAYER_FREE_MOVE:
+                if event.key == pyg.K_w or event.key == pyg.K_UP: ON_KEY.remove("w")
+                if event.key == pyg.K_a or event.key == pyg.K_LEFT: ON_KEY.remove("a")
+                if event.key == pyg.K_s or event.key == pyg.K_DOWN: ON_KEY.remove("s")
+                if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.remove("d")
+            else:
+                if event.key == pyg.K_a: ON_KEY.remove("a")
+                if event.key == pyg.K_s: CHARACTER_BOX = player.sneak()
+                if event.key == pyg.K_d: ON_KEY.remove("d")
 
     terrain.update(TERRAIN_POS, TERRAIN_BLOCK)
     player.update(TERRAIN_POS, TERRAIN_OFFSET)
+    terrain.display()
     player.show()
-    try:
-        terrain.display()  # this checks if the player is out of bound of terrain size
-    except IndexError:
-        TERRAIN_OFFSET = [5, 5]
+    if not PLAYER_FREE_MOVE:
+        TERRAIN_POS[1] -= FALL_SPEED
+        COLLISION = player.collision(TERRAIN_BLOCK)
+        if SOUTH in COLLISION:
+            if "s" in ON_KEY: TERRAIN_POS[1] += SPEED  # counter-acts from going down
+            TERRAIN_POS[1] += FALL_SPEED  # When it collides counter acts the fall speed
+            if NORTH in COLLISION: TERRAIN_POS[1] += JUMP_SPEED+SPEED  # Error checking, more like preventing the player going down
+        if NORTH in COLLISION: TERRAIN_POS[1] -= JUMP_SPEED+SPEED  # counter-acts form going up
+        if EAST in COLLISION and "d" in ON_KEY: TERRAIN_POS[0] += SPEED   # counter-acts form going right
+        if WEST in COLLISION and "a" in ON_KEY: TERRAIN_POS[0] -= SPEED   # counter-acts form going left
+    if TERRAIN_POS[0]/BLOCK_SZ >= 1.0:    TERRAIN_OFFSET[0] -= 1; TERRAIN_POS[0] = -SPEED  # left side
+    elif TERRAIN_POS[0]/BLOCK_SZ <= -1.0: TERRAIN_OFFSET[0] += 1; TERRAIN_POS[0] = -SPEED  # right side
+    elif TERRAIN_POS[1]/BLOCK_SZ >= 1.0:  TERRAIN_OFFSET[1] -= 1; TERRAIN_POS[1] = -SPEED  # top side
+    elif TERRAIN_POS[1]/BLOCK_SZ <= -1.0: TERRAIN_OFFSET[1] += 1; TERRAIN_POS[1] = -SPEED  # bottom side
 
-    TERRAIN_POS[1] -= FALL_SPEED
-    CHARACTER_JUMP = False
-    COL = player.collision(TERRAIN_BLOCK)
-    if EAST in COL:
-        if "d" in ON_KEY: TERRAIN_POS[0] += SPEED  # counter-acts form going right
-    if SOUTH in COL:
-        if "s" in ON_KEY: TERRAIN_POS[1] += SPEED  # counter-acts form going down
-        TERRAIN_POS[1] += FALL_SPEED  # When it collides, Fall_speed
-        CHARACTER_JUMP = True
-    if WEST in COL:
-        if "a" in ON_KEY: TERRAIN_POS[0] -= SPEED  # counter-acts form going left
-    if NORTH in COL:
-        if "w" in ON_KEY: TERRAIN_POS[1] -= SPEED  # counter-acts form going up
-    if TERRAIN_POS[0]/BLOCK_SZ >= 1.0:  # left side
-        TERRAIN_OFFSET[0] -= 1
-        TERRAIN_POS[0] = -SPEED
-    elif (TERRAIN_POS[0])/BLOCK_SZ <= -1.0:  # right side
-        TERRAIN_OFFSET[0] += 1
-        TERRAIN_POS[0] = -SPEED
-    elif (TERRAIN_POS[1])/BLOCK_SZ >= 1.0:  # top side
-        TERRAIN_OFFSET[1] -= 1
-        TERRAIN_POS[1] = -SPEED
-    elif (TERRAIN_POS[1])/BLOCK_SZ <= -1.0:  # bottom side
-        TERRAIN_OFFSET[1] += 1
-        TERRAIN_POS[1] = -SPEED
+    if PLAYER_FREE_MOVE:
+        if "w" in ON_KEY: TERRAIN_POS[1] += SPEED
+        if "a" in ON_KEY: TERRAIN_POS[0] += SPEED
+        if "s" in ON_KEY: TERRAIN_POS[1] -= SPEED
+        if "d" in ON_KEY: TERRAIN_POS[0] -= SPEED
+    else:
+        if CHARACTER_JUMP: TERRAIN_POS[1] += round(m.sin(m.radians(CHARACTER_JUMP_LEN))*JUMP_HEIGHT); CHARACTER_JUMP_LEN += JUMP_SPEED  # UP - Jump
+        if "a" in ON_KEY: TERRAIN_POS[0] += SPEED  # LEFT - Go lef
+        # if "s" in ON_KEY: TERRAIN_POS[1] -= SPEED  # DOWN - Sneak
+        if "d" in ON_KEY: TERRAIN_POS[0] -= SPEED  # RIGHT - Go right
+        if JUMP_MAX_LEN <= CHARACTER_JUMP_LEN: CHARACTER_JUMP = False; CHARACTER_JUMP_LEN = 0;
 
     pyg.display.flip()
     clock.tick(FPS)
