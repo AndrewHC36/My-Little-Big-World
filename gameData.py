@@ -27,12 +27,14 @@ def generator(seed, size):
     ter = []
     for i in range(size[0]):  # Width
         s = []
-        rand = r.randint(0, 4)
-        for j in range(size[1]):  # Hieght
-            if 25 < j < 30:
-                if j > 25+rand: s.append("b")
-                else: s.append("a")
-            elif j < 26: s.append("a")
+        #rand = r.randint(0, 4)
+        for j in range(size[1]):  # Height
+            if 10 < j < 100:
+                if i-1 <= -1: continue
+                if ter[i-1][j] == "c" or ter[i-1][j] == "a":
+                    if r.randint(0, 5) == 0: s.append("a")
+                else: s.append("c")
+            elif j < 11: s.append("a")
             else: s.append("c")
         ter.append("".join(s))
     return ter
