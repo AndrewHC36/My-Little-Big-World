@@ -8,10 +8,19 @@ CHARACTER_BOX = (9, 15)  # follows the proportion of 3:5
 TERRAIN_FULLBOX = (500, 250)
 TERRAIN_VIEWBOX = (-1, -1, 25, 40)
 VIEWBOX_SMOOTHER = 5  # pixels
-COLLISION_SZ = 2  # DEFUALT IS 2; BUT do to the fall speed I must do make the sz 2 else it would go through blocks
 
-FALL_SPEED = 3
-GRAVITY = 5
+# collision
+COLLISION_SZ = 2  # DEFUALT IS 2; BUT do to the fall speed I must do make the sz 2 else it would go through blocks
+TOP_PAD = 5
+BOT_PAD = -5
+RGT_PAD = 5
+LFT_PAD = -11
+
+# jumping mechanism
+FALL_SPEED = 5
+JUMP_SPEED = 5
+JUMP_HEIGHT = 15
+JUMP_MAX_LEN = 181
 
 # variable name
 # direction
@@ -26,4 +35,5 @@ B_STONE = "b"
 COLLISION_OFS = (BLOCK_SZ, BLOCK_SZ)
 
 # **DEBUGGING**
-SHOW_PLAYER_COLLISION = False
+SHOW_PLAYER_COLLISION = True
+PLAYER_FREE_MOVE = False
