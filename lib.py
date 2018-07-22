@@ -48,50 +48,37 @@ class Character:
         col = []
         x, y, X, Y = self.x, self.y, CHARACTER_BOX[0]*PIXEL_SZ+self.x, CHARACTER_BOX[1]*PIXEL_SZ+self.y
         a, b, A, B = (x//BLOCK_SZ)*BLOCK_SZ, (y//BLOCK_SZ)*BLOCK_SZ, (X//BLOCK_SZ)*BLOCK_SZ, (Y//BLOCK_SZ)*BLOCK_SZ
-        C = BLOCK_SZ
         if SHOW_PLAYER_COLLISION:
             pyg.draw.line(self.win, (0, 255, 0), (x, y), (x, Y), 4)  # LEFT
             pyg.draw.line(self.win, (0, 255, 0), (X, y), (X, Y), 4)  # RIGHT
             pyg.draw.line(self.win, (0, 255, 0), (x, y), (X, y), 4)  # TOP
             pyg.draw.line(self.win, (0, 255, 0), (x, Y), (X, Y), 4)  # BOTTOM
-            [pyg.draw.rect(self.win, (255, 0, 255), (a+self.tx+i, B+self.ty+j, BLOCK_SZ, BLOCK_SZ), 1) for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C) for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C)]
-            for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # BOTTOM
-                for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                    if blockTerrain[(a+i)//BLOCK_SZ-1][(B+j)//BLOCK_SZ-1] != B_AIR:
+            for i in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
+                for j in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
+                    pyg.draw.rect(self.win, (255, 0, 255), (a+self.tx+i, B+self.ty+j, BLOCK_SZ, BLOCK_SZ), 1)  # The purple square
+                    if blockTerrain[(a+i)//BLOCK_SZ-1][(B+j)//BLOCK_SZ-1] != B_AIR:  # BOTTOM
                         pyg.draw.line(self.win, (0, 255, 255), (a+self.tx+i, B+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
-            for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # TOP
-                for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                    if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-2] != B_AIR:
+                    if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-2] != B_AIR:  # TOP
                         pyg.draw.line(self.win, (255, 255, 0), (a+self.tx+i, b+self.ty+j), (A+self.tx+i, b+self.ty+j), 4)
-            for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # LEFT
-                for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                    if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-1] != B_AIR:
+                    if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-1] != B_AIR:  # LEFT
                         pyg.draw.line(self.win, (255, 255, 0), (a+self.tx+i, b+self.ty+j), (a+self.tx+i, B+self.ty+j), 4)
-            for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # RIGHT
-                for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                    if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:
+                    if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:  # RIGHT
                         pyg.draw.line(self.win, (0, 255, 255), (A+self.tx+i, b+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
 
-        for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # BOTTOM
-            for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                if blockTerrain[(a+i)//BLOCK_SZ-1][(B+j)//BLOCK_SZ-1] != B_AIR:
-                    if B+self.ty+j < Y and (x < x+self.tx+i < X or x < X+self.tx+i-1 < X): col.append(SOUTH)
-        for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # TOP
-            for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-2] != B_AIR:
-                    if b+self.ty+j > y and (x < x+self.tx+i < X or x < X+self.tx+i-1 < X): col.append(NORTH)
-        for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # LEFT side collision is when the player goes RIGHT
-            for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-1] != B_AIR:
-                    if x < x+self.tx+i-11 < X and (y < y+self.ty+j < Y or y < Y+self.ty+j-1 < Y): col.append(EAST)
-        for i in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):  # RIGHT; and vice versa
-            for j in range(-C*COLLISION_SZ,C*COLLISION_SZ+1,C):
-                if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:
-                    if x < A+self.tx+i+5 < X and (y < Y+self.ty+j < Y or y < y+self.ty+j-1 < Y): col.append(WEST)
-        return col # at most 2 side collision. since character-bx is smaller than block
+        for i in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
+            for j in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
+                if blockTerrain[(a+i)//BLOCK_SZ-1][(B+j)//BLOCK_SZ-1] != B_AIR:  # BOTTOM
+                    if B+self.ty+j+BOT_PAD < Y and (x < x+self.tx+i < X or x < X+self.tx+i-1 < X): col.append(SOUTH)
+                if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-2] != B_AIR:  # TOP
+                    if b+self.ty+j+TOP_PAD > y and (x < x+self.tx+i < X or x < X+self.tx+i-1 < X): col.append(NORTH)
+                if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-1] != B_AIR:  # LEFT side collision is when the player goes RIGHT
+                    if x < x+self.tx+i+LFT_PAD < X and (y < y+self.ty+j < Y or y < Y+self.ty+j-1 < Y): col.append(EAST)
+                if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:  # RIGHT; and vice versa
+                    if x < A+self.tx+i+RGT_PAD < X and (y < Y+self.ty+j < Y or y < y+self.ty+j-1 < Y): col.append(WEST)
+        return col # at most 2 side collision. since character-bx is smaller than block; maybe 3 due to the paddings
 
-    def jump(self, ): pass
-
+    def sneak(self):
+        return (CHARACTER_BOX[1], CHARACTER_BOX[0])
 
 class Terrain:
     def __init__(self, win, viewBX, terrainDT, currentBLK):
