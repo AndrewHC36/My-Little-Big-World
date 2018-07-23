@@ -57,13 +57,13 @@ class Character:
                 for j in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
                     pyg.draw.rect(self.win, (255, 0, 255), (a+self.tx+i, B+self.ty+j, BLOCK_SZ, BLOCK_SZ), 1)  # The purple square
                     if blockTerrain[(a+i)//BLOCK_SZ-1][(B+j)//BLOCK_SZ-1] != B_AIR:  # BOTTOM
-                        pyg.draw.line(self.win, (0, 255, 255), (a+self.tx+i, B+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
+                        pyg.draw.line(self.win, (255, 255, 0), (a+self.tx+i, B+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
                     if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-2] != B_AIR:  # TOP
                         pyg.draw.line(self.win, (255, 255, 0), (a+self.tx+i, b+self.ty+j), (A+self.tx+i, b+self.ty+j), 4)
                     if blockTerrain[(a+i)//BLOCK_SZ-1][(b+j)//BLOCK_SZ-1] != B_AIR:  # LEFT
                         pyg.draw.line(self.win, (255, 255, 0), (a+self.tx+i, b+self.ty+j), (a+self.tx+i, B+self.ty+j), 4)
                     if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:  # RIGHT
-                        pyg.draw.line(self.win, (0, 255, 255), (A+self.tx+i, b+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
+                        pyg.draw.line(self.win, (255, 255, 0), (A+self.tx+i, b+self.ty+j), (A+self.tx+i, B+self.ty+j), 4)
 
         for i in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
             for j in range(-BLOCK_SZ*COLLISION_SZ,BLOCK_SZ*COLLISION_SZ+1,BLOCK_SZ):
@@ -76,6 +76,21 @@ class Character:
                 if blockTerrain[(A+i)//BLOCK_SZ-2][(B+j)//BLOCK_SZ-2] != B_AIR:  # RIGHT; and vice versa
                     if x < A+self.tx+i+RGT_PAD < X and (y < Y+self.ty+j < Y or y < y+self.ty+j-1 < Y): col.append(WEST)
         return col # at most 2 side collision. since character-bx is smaller than block; maybe 3 due to the paddings
+
+    def raycast(self, RAYCAST_PP, button, chosenBlock):
+        X, Y = self.x+CHARACTER_BOX[0]//2*PIXEL_SZ, self.y+CHARACTER_BOX[1]//2*PIXEL_SZ
+        BXI, BYI = (RAYCAST_PP[0]+self.ty)//BLOCK_SZ-1, (RAYCAST_PP[1]+self.tx)//BLOCK_SZ-1  # Block's [x/y] index of the block terrain
+        BXL, BYL = BXI*BLOCK_SZ, BYI*BLOCK_SZ  # Block [x/y] location
+        BLOCK = ""
+        if SHOW_RAYCAST:
+            pyg.draw.circle(self.win, (255, 0, 0), (X, Y), RAYCAST_MAX_CIRCLE*BLOCK_SZ, 2)
+            pyg.draw.line(self.win, (0, 0, 255), (X, Y), (X, Y+RAYCAST_MAX_CIRCLE*BLOCK_SZ), 2)
+            pyg.draw.rect(self.win, (255, 200, 100), (BXL, BYL, BLOCK_SZ, BLOCK_SZ))
+            pyg.draw.rect(self.win, (255, 125, 0), (BXL, BYL, BLOCK_SZ, BLOCK_SZ), 4)
+        if button == LEFT_CLK: BLOCK = "a"  # Left  Click - Break - Break into an air
+        if button == RIGHT_CLK: BLOCK = chosenBlock # Right Click - Place - Place onto there chosen block
+        print(BXL, BYL, BXI, BYI)
+        return BXI, BYI, BLOCK # Coordinates of BLOCK TERRAIN/Break or Place - POS, BLOCK_ID
 
     def sneak(self):
         return (CHARACTER_BOX[1], CHARACTER_BOX[0])
