@@ -1,5 +1,3 @@
-# !=====! IMMUTABLE CONSTANTS !=====!
-
 # ( width or x, height or y)
 SCREEN_SIZE = (1960, 1080)
 PIXEL_SZ = 5  # the most base unit of the game.
