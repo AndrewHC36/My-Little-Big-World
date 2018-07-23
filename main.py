@@ -39,16 +39,17 @@ pyg.display.set_caption(TITLE)
 ON_KEY = []
 CHARACTER_NAME = ""
 CHARACTER_POS = [SCREEN_SIZE[1]//2-CHARACTER_BOX[1]*PIXEL_SZ//2, SCREEN_SIZE[0]//2-CHARACTER_BOX[0]*PIXEL_SZ//2]  # The unit is pixel CHARACTER ALWAYS @ CENTER
-TERRAIN_POS = [0, 0]  # The unit is pixel and THE POS OF TERRAIN. Starts @ very top-left corner
-TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of the viewbox
-TERRAIN_DATA = gd.terrain
-TERRAIN_BLOCK = []
 CHARACTER_STATE = ""  # walkingLTa1, walkingRTa1, sneakLT, etc. etc.
 CHARACTER_JUMP = False
 CHARACTER_JUMP_LEN = 0
 COLLISION = []
-player = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
-terrain = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
+TERRAIN_POS = [0, 0]  # The unit is pixel and THE POS OF TERRAIN. Starts @ very top-left corner
+TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of the viewbox
+TERRAIN_DATA = gd.terrain
+TERRAIN_BLOCK = []
+PLAYER_CURRENT_BLOCK = "b"
+MAIN_PLAYER = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
+TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
 
 while MAIN_LOOP:
     win.fill((0, 0, 0))
@@ -64,12 +65,11 @@ while MAIN_LOOP:
                 if event.key == pyg.K_s or event.key == pyg.K_DOWN: ON_KEY.append("s")
                 if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.append("d")
             else:
-                if event.key == pyg.K_w and SOUTH in COLLISION: CHARACTER_JUMP = True
+                if (event.key == pyg.K_UP or event.key == pyg.K_w) and SOUTH in COLLISION: CHARACTER_JUMP = True
                 if event.key == pyg.K_a or event.key == pyg.K_LEFT: ON_KEY.append("a")
-                if event.key == pyg.K_s or event.key == pyg.K_DOWN: CHARACTER_BOX = player.sneak()
+                if event.key == pyg.K_s or event.key == pyg.K_DOWN: CHARACTER_BOX = MAIN_PLAYER.sneak()
                 if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.append("d")
-                if event.key == pyg.K_SPACE: CHARACTER_JUMP = True
-
+                if (event.key == pyg.K_UP or event.key == pyg.K_SPACE) and SOUTH in COLLISION: CHARACTER_JUMP = True
         elif event.type == pyg.KEYUP:
             if PLAYER_FREE_MOVE:
                 if event.key == pyg.K_w or event.key == pyg.K_UP: ON_KEY.remove("w")
@@ -78,16 +78,28 @@ while MAIN_LOOP:
                 if event.key == pyg.K_d or event.key == pyg.K_RIGHT: ON_KEY.remove("d")
             else:
                 if event.key == pyg.K_a: ON_KEY.remove("a")
-                if event.key == pyg.K_s: CHARACTER_BOX = player.sneak()
+                if event.key == pyg.K_s: CHARACTER_BOX = MAIN_PLAYER.sneak()
                 if event.key == pyg.K_d: ON_KEY.remove("d")
+        elif event.type == pyg.MOUSEBUTTONDOWN:
+            if event.button == RIGHT_CLK: ON_KEY.append("1")
+            if event.button == LEFT_CLK: ON_KEY.append("3")
+        elif event.type == pyg.MOUSEBUTTONUP:
+            if event.button == RIGHT_CLK: ON_KEY.remove("1")
+            if event.button == LEFT_CLK: ON_KEY.remove("3")
 
-    terrain.update(TERRAIN_POS, TERRAIN_BLOCK)
-    player.update(TERRAIN_POS, TERRAIN_OFFSET)
-    terrain.display()
-    player.show()
+    TERRAIN.update(TERRAIN_POS, TERRAIN_BLOCK)
+    MAIN_PLAYER.update(TERRAIN_POS, TERRAIN_OFFSET)
+    TERRAIN.display()
+    MAIN_PLAYER.show()
+    if "1" in ON_KEY or "3" in ON_KEY:
+        if "1" in ON_KEY: RAYCAST = MAIN_PLAYER.raycast(pyg.mouse.get_pos(), LEFT_CLK, PLAYER_CURRENT_BLOCK)
+        if "3" in ON_KEY: RAYCAST = MAIN_PLAYER.raycast(pyg.mouse.get_pos(), RIGHT_CLK, PLAYER_CURRENT_BLOCK)
+        TERRAIN_DATA[RAYCAST[0]+TERRAIN_OFFSET[0]][RAYCAST[1]+TERRAIN_OFFSET[1]] = RAYCAST[2]
+        # saving on main list bc the terrain block resets  a self and not save it to main list, and saving block to main is time consuming
+
     if not PLAYER_FREE_MOVE:
         TERRAIN_POS[1] -= FALL_SPEED
-        COLLISION = player.collision(TERRAIN_BLOCK)
+        COLLISION = MAIN_PLAYER.collision(TERRAIN_BLOCK)
         if SOUTH in COLLISION:
             if "s" in ON_KEY: TERRAIN_POS[1] += SPEED  # counter-acts from going down
             TERRAIN_POS[1] += FALL_SPEED  # When it collides counter acts the fall speed
