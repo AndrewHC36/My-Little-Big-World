@@ -1,6 +1,10 @@
 # My Little Big World 
 This is a game based off of Terreria, Minecraft, and other sandbox games. What **motivated** me to build this game is the **inspiration** from the sandbox game where you can **create**, **build**, and be **creative!**. This game is still in development as it says in In-Dev (In Development).
 
+### Future stuff soon to be added:
+  * A 100% accurate placing breaking block system
+  * NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
+
 This is how I manage the software update number. ==> NAME 1.2.3.4
 NAME - (Indev, Alpha, Beta, Release)
 1 - Major implementation (e.g. Placing Breaking, GUI Hotbar, etc. etc.)
