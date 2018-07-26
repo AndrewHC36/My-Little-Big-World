@@ -1,16 +1,9 @@
 # My Little Big World 
-This is a game based off of Terreria, Minecraft, and other sandbox games. What **motivated** me to build this game is the **inspiration** from the sandbox game where you can **create**, **build**, and be **creative!**. This game is still in development as it says in In-Dev (In Development).
+This is a game based off of Terreria, Minecraft, and other sandbox games. What **motivated** me to build this game is the **inspiration** from the sandbox game where you can **create**, **build**, and be **creative!**. There will be 3 gamemodes, with two of them going to be survival and creative. The last gamemode is very special about this game is you can code to build your own minigame. Thats going to be very future but I am hoping this will come true! This game is still in development as it says in In-Dev (In Development).
 
 ### Future stuff soon to be added:
   * A 100% accurate placing breaking block system
   * NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
-
-This is how I manage the software update number. ==> NAME 1.2.3.4
-NAME - (Indev, Alpha, Beta, Release)
-1 - Major implementation (e.g. Placing Breaking, GUI Hotbar, etc. etc.)
-2 - Fixed Bugs or smoothen (e.g. Smoother collision, More accurate placing breaking blocks, etc. etc.)
-3 - Minor Bugs or In-Code improvements (e.g. Changed variables name, faster speed, etc. etc.)
-4 - Builds
 
 ### Indev 3.2.2 (7/25/18):
   * CHANGED: Changed the whole collision system to more fine tune and faster and cleaner!
