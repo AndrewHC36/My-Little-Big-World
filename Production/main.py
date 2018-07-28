@@ -28,7 +28,7 @@ FPS = 100  # Frames          / sec   this is the base unit of speed
 TITLE = "My Little Big World - {} ".format(WORLD_NAME)
 
 GAME_OPTIONS = {
-    "AUTO-JUMP": False
+    "AUTO-JUMP": True
 }
 
 pyg.init()
@@ -54,8 +54,7 @@ TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
 
 while MAIN_LOOP:
     win.fill((0, 0, 0))
-    TERRAIN_BLOCK = [TERRAIN_DATA[i][0+TERRAIN_OFFSET[1]:TERRAIN_VIEWBOX[2]+TERRAIN_OFFSET[1]] for i in range(0+TERRAIN_OFFSET[0],TERRAIN_VIEWBOX[3]+TERRAIN_OFFSET[0])]
-
+    TERRAIN_BLOCK = [TERRAIN_DATA[i][TERRAIN_OFFSET[1]:TERRAIN_VIEWBOX[2]+TERRAIN_OFFSET[1]] for i in range(TERRAIN_OFFSET[0],TERRAIN_VIEWBOX[3]+TERRAIN_OFFSET[0])]
     for event in pyg.event.get():
         if event.type == pyg.QUIT: MAIN_LOOP = False
         elif event.type == pyg.KEYDOWN:
@@ -68,7 +67,9 @@ while MAIN_LOOP:
             if event.key == eval(GK["left"][1]): ON_KEY.remove(GK["left"][0])
             #if event.key == eval(GK["sneak"][1]): CHARACTER_BOX = MAIN_PLAYER.sneak()
             if event.key == eval(GK["right"][1]): ON_KEY.remove(GK["right"][0])
-            if event.key == eval(GK["jump"][1]) and ON_KEY.count(GK["jump"][0]) > 0: ON_KEY.remove(GK["jump"][0])
+            if event.key == eval(GK["jump"][1]):
+                if ON_KEY.count(GK["jump"][0]) > 0: ON_KEY.remove(GK["jump"][0])
+                CHARACTER_JUMP = False
         elif event.type == pyg.MOUSEBUTTONDOWN:
             if event.button == eval(GK["place"][1]): ON_KEY.append(GK["place"][0])
             if event.button == eval(GK["break"][1]): ON_KEY.append(GK["break"][0])
@@ -80,17 +81,22 @@ while MAIN_LOOP:
     MAIN_PLAYER.update(TERRAIN_POS, TERRAIN_OFFSET)
     TERRAIN.display()
     MAIN_PLAYER.show()
+
     if GK["place"][0] in ON_KEY or GK["break"][0] in ON_KEY:
         EDIT = MAIN_PLAYER.edit(pyg.mouse.get_pos(), ON_KEY, PLAYER_CURRENT_BLOCK)
         if EDIT[3]: TERRAIN_DATA[EDIT[0]+TERRAIN_OFFSET[0]][EDIT[1]+TERRAIN_OFFSET[1]] = EDIT[2]
         # saving on main list bc the terrain block resets  a self and not save it to main list, and saving block to main is time consuming
-
+    #print(TERRAIN_OFFSET[1])
     TERRAIN_POS[1] -= FALL_SPEED
     COLLISION = MAIN_PLAYER.collision(TERRAIN_BLOCK)
+    if TERRAIN_OFFSET[0] < 0: COLLISION.append(WEST)
+    if TERRAIN_OFFSET[1] < 1: COLLISION.append(NORTH); print("STP")
+    if TERRAIN_OFFSET[0]+1 >= WORLD_SIZE[0]: COLLISION.append(EAST); print("SOUTH")
+    if TERRAIN_OFFSET[1] >= WORLD_SIZE[1]: COLLISION.append(SOUTH)
     if SOUTH in COLLISION:
         TERRAIN_POS[1] += FALL_SPEED  # When it collides counter acts the fall speed
-        if NORTH in COLLISION: TERRAIN_POS[1] += JUMP_SPEED+CHARACTER_SPEED+FALL_SPEED  # Error checking, more like preventing the player going down
-    if NORTH in COLLISION: CHARACTER_JUMP = False;  TERRAIN_POS[1] -= JUMP_SPEED # counter-acts form going up
+        if NORTH in COLLISION: TERRAIN_POS[1] += CHARACTER_SPEED**CHARACTER_SPEED  # Error checking, more like preventing the player going down
+    if NORTH in COLLISION: CHARACTER_JUMP = False # counter-acts form going up
     if EAST in COLLISION and GK["right"][0] in ON_KEY: TERRAIN_POS[0] += CHARACTER_SPEED   # counter-acts form going right
     if WEST in COLLISION and GK["left"][0] in ON_KEY: TERRAIN_POS[0] -= CHARACTER_SPEED   # counter-acts form going left
     if TERRAIN_POS[0]/BLOCK_SZ >= 1.0:    TERRAIN_OFFSET[0] -= 1; TERRAIN_POS[0] = -CHARACTER_SPEED  # left side
