@@ -62,12 +62,11 @@ class Character:
         return COL  # at most two collision, sometime three.
 
     def edit(self, loc, key, chosenBlock):
-        pyg.draw.circle(self.win, (255, 255, 0), (self.x, self.y), EDIT_MAX_CIRCLE*BLOCK_SZ, 4)
-        pyg.draw.rect(self.win, (0, 255, 255), (self.x, self.y, self.x-loc[0], self.y-loc[1]))
+        x, y = self.x+CHARACTER_BOX[0]*PIXEL_SZ//2, self.y+CHARACTER_BOX[1]*PIXEL_SZ//2
         BXI, BYI = (loc[0]-self.tx)//BLOCK_SZ-TERRAIN_VIEWBOX[0], (loc[1]-self.ty)//BLOCK_SZ-TERRAIN_VIEWBOX[1]  # Block's [x/y] index of the block terrain
-        if GK["break"][0] in key: BLOCK = BLK["air"]  # Left  Click - Break - Break into an air
+        if abs(loc[0]-x)+abs(loc[1]-y) > EDIT_MAX_CIRCLE*BLOCK_SZ: return 0, 0, 0, False
+        elif GK["break"][0] in key: BLOCK = BLK["air"]  # Left  Click - Break - Break into an air
         elif GK["place"][0] in key: BLOCK = chosenBlock  # Right Click - Place - Place onto there chosen block
-        else: return 0, 0, 0, False
         return BXI, BYI, BLOCK, True
 
     def sneak(self):
