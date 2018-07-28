@@ -3,10 +3,13 @@ This is a game based off of Terreria, Minecraft, and other sandbox games. What *
 Note: I'm currently building surival mode.
 
 ### Future stuff soon to be added:
-  1. Finish the limit of break-placing block
-  2. Fix the border issue and change how it acts when touched to the border
-  3. Less sensitive jumping
-  4. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
+  1. Fix the border issue and change how it acts when touched to the border
+  2. Less sensitive jumping
+  3. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
+
+### Indev 3.4.1 (7/28/18):
+  * ADDED: Editing border
+  * NOTE: Guess will be sticking with 3 for a while. :)
 
 ### Indev 3.3 (7/28/18):
   * FIXED: 100% Accurate editing (placing-breaking) block
