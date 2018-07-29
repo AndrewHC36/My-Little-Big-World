@@ -11,9 +11,11 @@ Note: I'm currently building surival mode.
 ### How to run:
   1. Download the 4 files: main.py; lib.py; gameData.py; constants.py;
   2. Than put into a folder with no other files to prevent mixing
-  3. Windows ~
-        C:Users/...> cd %FOLDER LOCATION%
-        C:Users/.../%FOLDER LOCATION%>py main.py
+  3. Windows ~ 
+     ```
+     C:Users/...> cd %FOLDER LOCATION%
+     C:Users/.../%FOLDER LOCATION%>py main.py
+     ```
 
 ### Requirements:
   1. Niether tested nor I know 100% its going to work on other display other then 1080-1920 px, so I recommend 1080p for now.
