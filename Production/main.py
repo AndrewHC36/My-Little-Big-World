@@ -9,7 +9,7 @@ import math as m
 from constants import *
 import lib as lb
 import gameData as gd
-import ctypes  # for the sake of stretching on high PPI screen
+import ctypes  # for the sake of stretching on 1080-1920 screen
 ctypes.windll.user32.SetProcessDPIAware()
 
 #WORLD_NAME_FILE_INPUT = input("ENTER FILE NAME WITH FILE EXTENSION: ")
@@ -19,13 +19,10 @@ ctypes.windll.user32.SetProcessDPIAware()
 # ( width or x, height or y)                                    _
 # the point of origin is at the most top left corner pixel --> |
 
-WORLD_RTIME = (True, 2018, 5, 15, 7, 30, 1)  #
-WORLD_GTIME = 0  # 0 - 240000 unit - tps
-WORLD_NAME = "Testing World"
-WORLD_DATA = ""
+world_name = "Testing World"
 WORLD_SIZE = (500, 250)
-FPS = 100  # Frames          / sec   this is the base unit of speed
-TITLE = "My Little Big World - {} ".format(WORLD_NAME)
+FPS = 100  # Frames / sec   this is the base unit of speed
+title = "My Little Big World - {} ".format(world_name)
 
 GAME_OPTIONS = {
     "AUTO-JUMP": True
@@ -34,23 +31,21 @@ GAME_OPTIONS = {
 pyg.init()
 win = pyg.display.set_mode((0,0), pyg.FULLSCREEN)
 clock = pyg.time.Clock()
-pyg.display.set_caption(TITLE)
+pyg.display.set_caption(title)
 
 
 CHARACTER_NAME = ""
-CHARACTER_POS = [SCREEN_SIZE[1]//2-CHARACTER_BOX[1]*PIXEL_SZ//2, SCREEN_SIZE[0]//2-CHARACTER_BOX[0]*PIXEL_SZ//2]  # The unit is pixel CHARACTER ALWAYS @ CENTER
-CHARACTER_STATE = ""  # walkingLTa1, walkingRTa1, sneakLT, etc. etc.
+CHARACTER_POS = [SCREEN_SIZE[1]//2-CHARACTER_BOX[1]*PIXEL_SZ//2, SCREEN_SIZE[0]//2-CHARACTER_BOX[0]*PIXEL_SZ//2]  # The unit is pixel
 CHARACTER_JUMP = False
 CHARACTER_JUMP_LEN = 0
-
 TERRAIN_POS = [0, 0]  # The unit is pixel and THE POS OF TERRAIN. Starts @ very top-left corner
 TERRAIN_OFFSET = [10, 10]  # Not techincally offset its more like the border of the viewbox
 TERRAIN_DATA = gd.terrain
 PLAYER_CURRENT_BLOCK = "b"
 
 ON_KEY, COLLISION, TERRAIN_BLOCK = [], [], []
-MAIN_PLAYER = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt), TERRAIN_OFFSET)
-TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, gd.terrain, TERRAIN_BLOCK)
+MAIN_PLAYER = lb.Character(win, CHARACTER_POS, TERRAIN_POS, CHARACTER_BOX, lb.hexTOrgb(gd.dt))
+TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, TERRAIN_DATA, TERRAIN_BLOCK)
 
 while MAIN_LOOP:
     win.fill((0, 0, 0))
@@ -61,11 +56,11 @@ while MAIN_LOOP:
             if event.key == pyg.K_ESCAPE: MAIN_LOOP = False
             if event.key == eval(GK["jump"][1]) and SOUTH in COLLISION: ON_KEY.append(GK["jump"][0]); CHARACTER_JUMP = True
             if event.key == eval(GK["left"][1]): ON_KEY.append(GK["left"][0])
-            #if event.key == eval(GK["sneak"][1]) or event.key: CHARACTER_BOX = MAIN_PLAYER.sneak()
+            # if event.key == eval(GK["sneak"][1]) or event.key: CHARACTER_BOX = MAIN_PLAYER.sneak()
             if event.key == eval(GK["right"][1]): ON_KEY.append(GK["right"][0])
         elif event.type == pyg.KEYUP:
             if event.key == eval(GK["left"][1]): ON_KEY.remove(GK["left"][0])
-            #if event.key == eval(GK["sneak"][1]): CHARACTER_BOX = MAIN_PLAYER.sneak()
+            # if event.key == eval(GK["sneak"][1]): CHARACTER_BOX = MAIN_PLAYER.sneak()
             if event.key == eval(GK["right"][1]): ON_KEY.remove(GK["right"][0])
             if event.key == eval(GK["jump"][1]):
                 if ON_KEY.count(GK["jump"][0]) > 0: ON_KEY.remove(GK["jump"][0])
@@ -78,15 +73,14 @@ while MAIN_LOOP:
             if event.button == eval(GK["break"][1]): ON_KEY.remove(GK["break"][0])
 
     TERRAIN.update(TERRAIN_POS, TERRAIN_BLOCK)
-    MAIN_PLAYER.update(TERRAIN_POS, TERRAIN_OFFSET)
+    MAIN_PLAYER.update(CHARACTER_POS, TERRAIN_POS)
     TERRAIN.display()
     MAIN_PLAYER.show()
 
     if GK["place"][0] in ON_KEY or GK["break"][0] in ON_KEY:
-        EDIT = MAIN_PLAYER.edit(pyg.mouse.get_pos(), ON_KEY, PLAYER_CURRENT_BLOCK)
+        EDIT = MAIN_PLAYER.edit(pyg.mouse.get_pos(), ON_KEY, PLAYER_CURRENT_BLOCK, TERRAIN_BLOCK)
         if EDIT[3]: TERRAIN_DATA[EDIT[0]+TERRAIN_OFFSET[0]][EDIT[1]+TERRAIN_OFFSET[1]] = EDIT[2]
-        # saving on main list bc the terrain block resets  a self and not save it to main list, and saving block to main is time consuming
-    #print(TERRAIN_OFFSET[1])
+        # saving on main list bc the terrain block resets itself and not save it to main list, and saving block to main is time consuming
     TERRAIN_POS[1] -= FALL_SPEED
     COLLISION = MAIN_PLAYER.collision(TERRAIN_BLOCK)
     if TERRAIN_OFFSET[0] < 0: COLLISION.append(WEST)
