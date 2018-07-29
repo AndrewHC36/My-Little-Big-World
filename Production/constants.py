@@ -19,6 +19,7 @@ LT_P = -5  # Left padding
 
 # placing and breaking
 EDIT_MAX_CIRCLE = 5  # Radius; block
+EDIT_OFS = (TERRAIN_VIEWBOX[0], TERRAIN_VIEWBOX[1])  # offset of placing blocks
 
 # jumping mechanism
 FALL_SPEED = 8  # DEFUALT: 8
