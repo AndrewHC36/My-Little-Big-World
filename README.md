@@ -14,12 +14,13 @@ Note: I'm currently building surival mode.
 
 ### How to play:
 C-Complete; N-Not Complete; W-Work in Progress
-KEY | STAT | DEFINITION
-W | C | Jump
-A | C | Go Left
-S | N | Sneak
-D | C | Go Right
-ESC | C | Escape, quit game, no saving
+| KEY | STAT | DEFINITION |
+|---|---|---|
+| W | C | Jump |
+| A | C | Go Left |
+| S | N | Sneak |
+| D | C | Go Right |
+| ESC | C | Escape, quit game, no saving |
 
 ### How to run:
   1. Download the 4 files: main.py; lib.py; gameData.py; constants.py;
