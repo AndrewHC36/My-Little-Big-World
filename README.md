@@ -8,4 +8,15 @@ Note: I'm currently building surival mode.
   3. Less sensitive jumping
   4. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
 
+### How to run:
+  1. Download the 4 files: main.py; lib.py; gameData.py; constants.py;
+  2. Than put into a folder with no other files to prevent mixing
+  3. Windows ~
+        C:> cd %FOLDER LOCATAION%
+        C:/...> main.py
 
+### Requirements:
+  1. Niether tested nor I know 100% its going to work on other display other then 1080-1920 px, so I recommend 1080p for now.
+  2. You must have a Python interpreter of at least Py-3.6
+  3. Windows only, unless you know how to do it on Mac or Linux.
+  4. Other than that there is no requirements unless you have a computer form 80's. :P
