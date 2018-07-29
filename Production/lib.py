@@ -1,10 +1,10 @@
 import pygame as pyg
+import math as m
 from constants import *
 pyg.init()
 
-
-def rnd(n, base):
-    return int(base*round(float(n)/base))
+def fr(n, base): return n//base*base  # floor
+def cl(x, b): return x if x%b == 0 else x+b-x%b  # ceil
 
 
 class WorldDt:
@@ -24,29 +24,29 @@ class WorldDt:
 
 
 class Character:
-    def __init__(self, win, ploc, tloc, sz, dt, ofs):
-        self.y = ploc[0]
-        self.x = ploc[1]
+    def __init__(self, win, ploc, tloc, sz, dt):
+        self.py = ploc[0]
+        self.px = ploc[1]
         self.tx = tloc[0]
         self.ty = tloc[1]
         self.win = win
         self.dt = dt
         self.sz = sz
-        self.ofs = ofs
 
-    def update(self, tloc, ofs):
+    def update(self, ploc, tloc):
+        self.py = ploc[0]
+        self.px = ploc[1]
         self.tx = tloc[0]
         self.ty = tloc[1]
-        self.ofs = ofs
 
     def show(self):
         for i in range(self.sz[0]):
             for j in range(self.sz[1]):
-                pyg.draw.rect(self.win, self.dt[i][j], (self.x+i*PIXEL_SZ, self.y+j*PIXEL_SZ, PIXEL_SZ, PIXEL_SZ))
+                pyg.draw.rect(self.win, self.dt[i][j], (self.px+i*PIXEL_SZ, self.py+j*PIXEL_SZ, PIXEL_SZ, PIXEL_SZ))
 
     def collision(self, blockt):
         COL = []  # pos of 4 points of character box; rounded to nearest block pos
-        x, y, X, Y = self.x, self.y, self.x+CHARACTER_BOX[0]*PIXEL_SZ, self.y+CHARACTER_BOX[1]*PIXEL_SZ
+        x, y, X, Y = self.px, self.py, self.px+CHARACTER_BOX[0]*PIXEL_SZ, self.py+CHARACTER_BOX[1]*PIXEL_SZ
         a, b, A, B = x//BLOCK_SZ*BLOCK_SZ, y//BLOCK_SZ*BLOCK_SZ, X//BLOCK_SZ*BLOCK_SZ, Y//BLOCK_SZ*BLOCK_SZ
         for i in range(-BLOCK_SZ*COLLISION_SZ, BLOCK_SZ*COLLISION_SZ+1, BLOCK_SZ):
             for j in range(-BLOCK_SZ*COLLISION_SZ, BLOCK_SZ*COLLISION_SZ+1, BLOCK_SZ):
@@ -61,12 +61,18 @@ class Character:
 
         return COL  # at most two collision, sometime three.
 
-    def edit(self, loc, key, chosenBlock):
-        x, y = self.x+CHARACTER_BOX[0]*PIXEL_SZ//2, self.y+CHARACTER_BOX[1]*PIXEL_SZ//2
-        BXI, BYI = (loc[0]-self.tx)//BLOCK_SZ-TERRAIN_VIEWBOX[0], (loc[1]-self.ty)//BLOCK_SZ-TERRAIN_VIEWBOX[1]  # Block's [x/y] index of the block terrain
-        if abs(loc[0]-x)+abs(loc[1]-y) > EDIT_MAX_CIRCLE*BLOCK_SZ: return 0, 0, 0, False
-        elif GK["break"][0] in key: BLOCK = BLK["air"]  # Left  Click - Break - Break into an air
-        elif GK["place"][0] in key: BLOCK = chosenBlock  # Right Click - Place - Place onto there chosen block
+    def edit(self, loc, key, chosenBlk, blkDt): # edit(self, mouse(x, y), ON_KEY, block to be placed, TERRAIN_BLOCK)
+        rx, ry = self.px+CHARACTER_BOX[0]*PIXEL_SZ//2, self.py+CHARACTER_BOX[1]*PIXEL_SZ//2
+        a, b, A, B = fr(self.px-self.tx, BLOCK_SZ), fr(self.py-self.ty, BLOCK_SZ), cl(self.px+CHARACTER_BOX[0]*PIXEL_SZ-self.tx, BLOCK_SZ), cl(self.py+CHARACTER_BOX[1]*PIXEL_SZ-self.ty, BLOCK_SZ)
+        BXI, BYI = (loc[0]-self.tx)//BLOCK_SZ-EDIT_OFS[0], (loc[1]-self.ty)//BLOCK_SZ-EDIT_OFS[1]  # Block's [x/y] index of the block terrain
+        if abs(loc[0]-rx)+abs(loc[1]-ry) > EDIT_MAX_CIRCLE*BLOCK_SZ or (a+self.tx-3 < loc[0] < A+self.tx and b+self.ty-3 < loc[1] < B+self.ty):
+            return 0, 0, 0, False
+        elif GK["break"][0] in key:
+            BLOCK = BLK["air"]  # Left  Click - Break - Break into an air
+        elif GK["place"][0] in key:
+            if (blkDt[BXI][BYI+1], blkDt[BXI+1][BYI], blkDt[BXI][BYI-1], blkDt[BXI-1][BYI]).count(BLK["air"]) != 4:
+                BLOCK = chosenBlk  # Right Click - Place - Place onto there chosen block
+            else: return 0, 0, 0, False
         return BXI, BYI, BLOCK, True
 
     def sneak(self):
