@@ -13,7 +13,7 @@ Note: I'm currently building surival mode.
   2. Than put into a folder with no other files to prevent mixing
   3. Windows ~ 
      ```cmd
-     C:Users/...> cd %FOLDER LOCATION%
+     C:Users/...>cd %FOLDER LOCATION%
      C:Users/.../%FOLDER LOCATION%>py main.py
      ```
 
@@ -22,3 +22,7 @@ Note: I'm currently building surival mode.
   2. You must have a Python interpreter of at least Py-3.6 and set it on path
   3. Windows only, unless you know how to do it on Mac or Linux.
   4. Other than that there is no requirements unless you have a computer form 80's. :P
+
+
+### Support/Help:
+  * Help us add How to Run for mac and linux
