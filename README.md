@@ -3,9 +3,10 @@ This is a game based off of Terreria, Minecraft, and other sandbox games. What *
 Note: I'm currently building surival mode.
 
 ### Future stuff soon to be added:
-  1. Fix the border issue and change how it acts when touched to the border
-  2. Less sensitive jumping
-  3. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
+  1. Fix/Smooth the top collision bumpy issue
+  2. Fix the border issue and change how it acts when touched to the border
+  3. Less sensitive jumping
+  4. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
 
 
 ### Indev 3.6 (7/29/18):
