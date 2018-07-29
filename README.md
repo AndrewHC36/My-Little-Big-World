@@ -12,7 +12,7 @@ Note: I'm currently building surival mode.
   1. Download the 4 files: main.py; lib.py; gameData.py; constants.py;
   2. Than put into a folder with no other files to prevent mixing
   3. Windows ~ 
-     ```
+     ```cmd
      C:Users/...> cd %FOLDER LOCATION%
      C:Users/.../%FOLDER LOCATION%>py main.py
      ```
