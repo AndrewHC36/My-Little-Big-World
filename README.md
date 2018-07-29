@@ -7,6 +7,11 @@ Note: I'm currently building surival mode.
   2. Less sensitive jumping
   3. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
 
+
+### Indev 3.6 (7/29/18):
+  * ADDED: Now you cannot place block *in* the character
+  * CHANGED: Now you cannot place block in between air, (4 sides, no diagonals)
+
 ### Indev 3.4.1 (7/28/18):
   * ADDED: Editing border
   * NOTE: Guess will be sticking with 3 for a while. :)
