@@ -15,7 +15,7 @@ Note: I'm currently building surival mode.
 ### How to play:
 C-Complete; N-Not Complete; W-Work in Progress
 KEY | STAT | DEFINITION 
----|---|---
+--- | --- | ---
 W | C | Jump 
 A | C | Go Left 
 S | N | Sneak 
