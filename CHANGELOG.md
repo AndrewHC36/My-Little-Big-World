@@ -1,3 +1,10 @@
+### Indev 3.9.1 (7/30/18):
+  * CHANGED: You cannot place block in non-air block
+  * CHANGED: There will bo no bumpy jumps and smoothen jumps
+  * CHANGED: Top collision is still bumpy but way better than last time
+  * CODE CHANGED: Changed naming convention
+  * NOTE: Top collision is still bumpy
+
 ### Indev 3.6 (7/29/18):
   * ADDED: Now you cannot place block *in* the character
   * CHANGED: Now you cannot place block in between air, (4 sides, no diagonals)
