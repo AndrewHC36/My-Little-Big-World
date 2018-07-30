@@ -10,8 +10,8 @@ TERRAIN_VIEWBOX = (-1, -1, 24, 41)
 CHARACTER_SPEED = 5  # unit - pixels per fps
 
 # collision
-COLLISION_SZ = 2  # DEFUALT IS 2; BUT do to the fall speed I must do make the sz 2 else it would go through blocks
-COLLISION_OFS = (TERRAIN_VIEWBOX[0], TERRAIN_VIEWBOX[1])  # offset of collision box relative to the player pos, defualt to first 2 value of viewbox
+COLLISION_SZ = 2  # DEFUALT IS 2; The size 1 is too small
+COLLISION_OFS = (-TERRAIN_VIEWBOX[0], -TERRAIN_VIEWBOX[1])  # offset of collision box relative to the player pos, defualt to first 2 value of viewbox
 TP_P = -3  # Top padding   *DO NOT CHANGE THE PADDINGS*
 BT_P = 5  # Bottom padding
 RT_P = 3  # Right padding
