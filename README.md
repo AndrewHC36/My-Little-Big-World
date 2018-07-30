@@ -4,7 +4,7 @@ Note: I'm currently building surival mode.
 
 ### Version Updates/History:
   * Linked here: [CHANGELOG](https://github.com/AndrewShen31/My-Little-Big-World/blob/master/CHANGELOG.md)
-  * Most recent update: Indev 3.6
+  * Most recent update: Indev 3.9.1
 
 ### Future stuff soon to be added:
   1. Fix/Smooth the top collision bumpy issue
