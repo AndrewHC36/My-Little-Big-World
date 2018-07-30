@@ -13,14 +13,18 @@ Note: I'm currently building surival mode.
   4. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
 
 ### How to play:
-C-Complete; N-Not Complete; W-Work in Progress
-| KEY | STAT | DEFINITION 
-| --- | --- | ---
-| W | C | Jump 
-| A | C | Go Left 
-| S | N | Sneak 
-| D | C | Go Right 
-| ESC | C | Escape, quit game, no saving 
+#### Keys:
+W - Jump
+A - Go left
+D - Go right
+ESC - Quit game, no savings
+#### Objective/Goals:  >>UNDER DEVELOPMENT<<
+Survival ~
+Your goal is to survive and your objective is to fight the boss.
+Creative ~
+No goal, objective is to be creative
+Build ~
+This gamemode is like programming using text file.
 
 ### How to run:
   1. Download the 4 files: main.py; lib.py; gameData.py; constants.py;
