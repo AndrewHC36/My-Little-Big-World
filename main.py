@@ -43,9 +43,9 @@ tern_ofs = [10, 10]  # Not techincally offset its more like the border of the vi
 tern_dt = gd.terrain
 ply_current_blk = "b"
 
-onKey, collision, terrainBlock = [], [], []
+onKey, collision, terrainCurrent = [], [], []
 MAIN_PLAYER = lb.Character(win, char_pos, tern_pos, CHARACTER_BOX, lb.hexTOrgb(gd.dt))
-TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, tern_dt, TERRAIN_BLOCK)
+TERRAIN = lb.Terrain(win, TERRAIN_VIEWBOX, tern_dt, terrainCurrent)
 
 while MAIN_LOOP:
     win.fill((0, 0, 0))
@@ -54,7 +54,7 @@ while MAIN_LOOP:
         if event.type == pyg.QUIT: MAIN_LOOP = False
         elif event.type == pyg.KEYDOWN:
             if event.key == pyg.K_ESCAPE: MAIN_LOOP = False
-            if event.key == eval(GK["jump"][1]) and SOUTH in collision: onKey.append(GK["jump"][0]); CHARACTER_JUMP = True
+            if event.key == eval(GK["jump"][1]) and SOUTH in collision: onKey.append(GK["jump"][0]); char_jump = True
             if event.key == eval(GK["left"][1]): onKey.append(GK["left"][0])
             # if event.key == eval(GK["sneak"][1]) or event.key: CHARACTER_BOX = MAIN_PLAYER.sneak()
             if event.key == eval(GK["right"][1]): onKey.append(GK["right"][0])
@@ -64,7 +64,8 @@ while MAIN_LOOP:
             if event.key == eval(GK["right"][1]): onKey.remove(GK["right"][0])
             if event.key == eval(GK["jump"][1]):
                 if onKey.count(GK["jump"][0]) > 0: onKey.remove(GK["jump"][0])
-                CHARACTER_JUMP = False
+                char_jump = False
+                char_jump_len = 0
         elif event.type == pyg.MOUSEBUTTONDOWN:
             if event.button == eval(GK["place"][1]): onKey.append(GK["place"][0])
             if event.button == eval(GK["break"][1]): onKey.append(GK["break"][0])
@@ -82,17 +83,17 @@ while MAIN_LOOP:
         if EDIT[3]: tern_dt[EDIT[0]+tern_ofs[0]][EDIT[1]+tern_ofs[1]] = EDIT[2]
         # saving on main list bc the terrain block resets itself and not save it to main list, and saving block to main is time consuming
     tern_pos[1] -= FALL_SPEED
-    COLLISION = MAIN_PLAYER.collision(terrainCurrent)
-    if tern_ofs[0] < 0: COLLISION.append(WEST)
-    if tern_ofs[1] < 1: COLLISION.append(NORTH); print("STP")
-    if tern_ofs[0]+1 >= world_size[0]: COLLISION.append(EAST); print("SOUTH")
-    if tern_ofs[1] >= world_size[1]: COLLISION.append(SOUTH)
-    if SOUTH in COLLISION:
+    collision = MAIN_PLAYER.collision(terrainCurrent)
+    if tern_ofs[0] < 0: collision.append(WEST)
+    if tern_ofs[1] < 1: collision.append(NORTH); print("STP")
+    if tern_ofs[0]+1 >= world_size[0]: collision.append(EAST); print("SOUTH")
+    if tern_ofs[1] >= world_size[1]: collision.append(SOUTH)
+    if SOUTH in collision:
         tern_pos[1] += FALL_SPEED  # When it collides counter acts the fall speed
-        if NORTH in COLLISION: tern_pos[1] += CHARACTER_SPEED**CHARACTER_SPEED  # Error checking, more like preventing the player going down
-    if NORTH in COLLISION: CHARACTER_JUMP = False # counter-acts form going up
-    if EAST in COLLISION and GK["right"][0] in onKey: tern_pos[0] += CHARACTER_SPEED   # counter-acts form going right
-    if WEST in COLLISION and GK["left"][0] in onKey: tern_pos[0] -= CHARACTER_SPEED   # counter-acts form going left
+        if NORTH in collision: tern_pos[1] += CHARACTER_SPEED**CHARACTER_SPEED # Error checking, more like preventing the player going down
+    if NORTH in collision: tern_pos[1] -= CHARACTER_SPEED; char_jump = False; char_jump_len = 0#round(m.sin(m.radians(char_jump_len))*JUMP_HEIGHT) # counter-acts form going up
+    if EAST in collision and GK["right"][0] in onKey: tern_pos[0] += CHARACTER_SPEED   # counter-acts form going right
+    if WEST in collision and GK["left"][0] in onKey: tern_pos[0] -= CHARACTER_SPEED   # counter-acts form going left
     if tern_pos[0]/BLOCK_SZ >= 1.0:    tern_ofs[0] -= 1; tern_pos[0] = -CHARACTER_SPEED  # left side
     elif tern_pos[0]/BLOCK_SZ <= -1.0: tern_ofs[0] += 1; tern_pos[0] = -CHARACTER_SPEED  # right side
     elif tern_pos[1]/BLOCK_SZ >= 1.0:  tern_ofs[1] -= 1; tern_pos[1] = -CHARACTER_SPEED  # top side
@@ -101,8 +102,8 @@ while MAIN_LOOP:
     if GK["left"][0] in onKey: tern_pos[0] += CHARACTER_SPEED  # LEFT - Go lef
     # if GK["sneak"][0] in onKey: TERRAIN_POS[1] -= SPEED  # DOWN - Sneak
     if GK["right"][0] in onKey: tern_pos[0] -= CHARACTER_SPEED  # RIGHT - Go right
-    if JUMP_MAX_LEN <= char_jump_len: CHARACTER_JUMP = False; CHARACTER_JUMP_LEN = 0;
-    if (GK["jump"][0] in onKey and SOUTH in COLLISION) and GAME_OPTIONS["AUTO-JUMP"]: CHARACTER_JUMP = True  # To jump continously when pressed
+    if JUMP_MAX_LEN <= char_jump_len: char_jump = False; char_jump_len = 0;
+    if (GK["jump"][0] in onKey and SOUTH in collision) and GAME_OPTIONS["AUTO-JUMP"]: char_jump = True  # To jump continously when pressed
 
     pyg.display.flip()
     clock.tick(FPS)
