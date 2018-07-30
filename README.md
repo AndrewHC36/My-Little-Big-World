@@ -7,10 +7,9 @@ Note: I'm currently building surival mode.
   * Most recent update: Indev 3.9.1
 
 ### Future stuff soon to be added:
-  1. Fix/Smooth the top collision bumpy issue
+  1. Smooth the top collision bumpy issue
   2. Fix the border issue and change how it acts when touched to the border
-  3. Less sensitive jumping
-  4. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
+  3. NEXT MAJOR UPDATE:  Add hotbar GUI, hearts.
 
 ### How to play:
 #### Keys:
